@@ -73,6 +73,7 @@ class RequestFuncInput:
     ignore_eos: bool = False
     language: Optional[str] = None
     request_id: Optional[str] = None
+    routing_strategy: Optional[str] = None
 
 
 @dataclass
@@ -131,6 +132,8 @@ async def async_request_openai_completions(
     }
     if request_func_input.request_id:
         headers["x-request-id"] = request_func_input.request_id
+    if request_func_input.routing_strategy:
+        headers["routing-strategy"] = request_func_input.routing_strategy
 
     output = RequestFuncOutput()
     output.prompt_len = request_func_input.prompt_len
@@ -260,6 +263,8 @@ async def async_request_openai_chat_completions(
     }
     if request_func_input.request_id:
         headers["x-request-id"] = request_func_input.request_id
+    if request_func_input.routing_strategy:
+        headers["routing-strategy"] = request_func_input.routing_strategy
 
     output = RequestFuncOutput()
     output.prompt_len = request_func_input.prompt_len

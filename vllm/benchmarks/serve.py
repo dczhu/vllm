@@ -394,6 +394,7 @@ async def benchmark(
     ramp_up_start_rps: Optional[int] = None,
     ramp_up_end_rps: Optional[int] = None,
     ready_check_timeout_sec: int = 600,
+    routing_strategy: Optional[str] = None,
 ):
     task_type = (
         TaskType.EMBEDDING
@@ -453,6 +454,7 @@ async def benchmark(
         multi_modal_content=test_mm_content,
         ignore_eos=ignore_eos,
         extra_body=extra_body,
+        routing_strategy=routing_strategy,
     )
 
     test_output = await wait_for_endpoint(
@@ -569,7 +571,8 @@ async def benchmark(
                                               multi_modal_content=mm_content,
                                               ignore_eos=ignore_eos,
                                               extra_body=extra_body,
-                                              request_id=request_id,)
+                                              request_id=request_id,
+                                              routing_strategy=routing_strategy,)
         tasks.append(
             asyncio.create_task(
                 limited_request_func(request_func_input=request_func_input,
@@ -1057,6 +1060,13 @@ def add_cli_args(parser: argparse.ArgumentParser):
         help="Maximum time to wait for the endpoint to become ready "
         "in seconds (default: 600 seconds / 10 minutes).",
     )
+    parser.add_argument(
+        "--routing-strategy",
+        type=str,
+        default="random",
+        help="Routing strategy header value to send with requests. "
+        "Default is 'random'. Can be set to 'pd' for prefetch-decode routing.",
+    )
 
 
 def main(args: argparse.Namespace) -> dict[str, Any]:
@@ -1166,6 +1176,7 @@ async def main_async(args: argparse.Namespace) -> dict[str, Any]:
         ramp_up_start_rps=args.ramp_up_start_rps,
         ramp_up_end_rps=args.ramp_up_end_rps,
         ready_check_timeout_sec=args.ready_check_timeout_sec,
+        routing_strategy=args.routing_strategy,
     )
 
     # Save config and results to json
