@@ -395,6 +395,7 @@ async def benchmark(
     ramp_up_end_rps: Optional[int] = None,
     ready_check_timeout_sec: int = 600,
     routing_strategy: Optional[str] = None,
+    max_tokens: Optional[int] = None,
 ):
     task_type = (
         TaskType.EMBEDDING
@@ -455,6 +456,7 @@ async def benchmark(
         ignore_eos=ignore_eos,
         extra_body=extra_body,
         routing_strategy=routing_strategy,
+        max_tokens=max_tokens,
     )
 
     test_output = await wait_for_endpoint(
@@ -486,7 +488,8 @@ async def benchmark(
                                          logprobs=logprobs,
                                          multi_modal_content=test_mm_content,
                                          ignore_eos=ignore_eos,
-                                         extra_body=extra_body)
+                                         extra_body=extra_body,
+                                         max_tokens=max_tokens)
         profile_output = await request_func(
             request_func_input=profile_input, session=session)
         if profile_output.success:
@@ -572,7 +575,8 @@ async def benchmark(
                                               ignore_eos=ignore_eos,
                                               extra_body=extra_body,
                                               request_id=request_id,
-                                              routing_strategy=routing_strategy,)
+                                              routing_strategy=routing_strategy,
+                                              max_tokens=max_tokens,)
         tasks.append(
             asyncio.create_task(
                 limited_request_func(request_func_input=request_func_input,
@@ -1067,6 +1071,13 @@ def add_cli_args(parser: argparse.ArgumentParser):
         help="Routing strategy header value to send with requests. "
         "Default is 'random'. Can be set to 'pd' for prefetch-decode routing.",
     )
+    parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=None,
+        help="Maximum number of tokens to generate in the response. "
+        "If not specified, uses the output_len from the dataset or --custom-output-len.",
+    )
 
 
 def main(args: argparse.Namespace) -> dict[str, Any]:
@@ -1177,6 +1188,7 @@ async def main_async(args: argparse.Namespace) -> dict[str, Any]:
         ramp_up_end_rps=args.ramp_up_end_rps,
         ready_check_timeout_sec=args.ready_check_timeout_sec,
         routing_strategy=args.routing_strategy,
+        max_tokens=args.max_tokens,
     )
 
     # Save config and results to json

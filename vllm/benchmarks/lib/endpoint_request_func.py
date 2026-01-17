@@ -74,6 +74,7 @@ class RequestFuncInput:
     language: Optional[str] = None
     request_id: Optional[str] = None
     routing_strategy: Optional[str] = None
+    max_tokens: Optional[int] = None
 
 
 @dataclass
@@ -116,7 +117,7 @@ async def async_request_openai_completions(
         "prompt": request_func_input.prompt,
         "temperature": 0.0,
         "repetition_penalty": 1.0,
-        "max_tokens": request_func_input.output_len,
+        "max_tokens": request_func_input.max_tokens if request_func_input.max_tokens is not None else request_func_input.output_len,
         "logprobs": request_func_input.logprobs,
         "stream": True,
         "stream_options": {
@@ -245,8 +246,7 @@ async def async_request_openai_chat_completions(
         ],
         "temperature":
         0.0,
-        "max_completion_tokens":
-        request_func_input.output_len,
+        "max_tokens": request_func_input.max_tokens if request_func_input.max_tokens is not None else request_func_input.output_len,
         "stream":
         True,
         "stream_options": {
